@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signupApi } from "../api/auth_api";
+import { SignupApi } from "../api/auth_api";
 import { InputError } from "../components/InputErrors";
 
 export default function Signup() {
@@ -27,7 +27,7 @@ export default function Signup() {
           ? { role, name: form.name, email: form.email, password: form.password }
           : { role, ...form };
 
-      const res = await signupApi(payload);
+      const res = await SignupApi(payload);
       localStorage.setItem("token", res.data.token);
       window.location.href = role === "CLIENT" ? "/client" : "/engineer";
     } catch (err) {

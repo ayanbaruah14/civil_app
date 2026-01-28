@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import {
+  CreateProjectApi,
+  GetAllEngineersApi,
+} from "../api/auth_api"; // adjust path if needed
 
-export const ClientDashboard=()=> {
+export const ClientDashboard = () => {
   const [engineers, setEngineers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -14,29 +19,49 @@ export const ClientDashboard=()=> {
     fetchEngineers();
   }, []);
 
+  // Fetch available engineers
   const fetchEngineers = async () => {
-    const res = await axios.get("http://localhost:4000/api/engineer/all", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    setEngineers(res.data);
+    try {
+      const res = await GetAllEngineersApi();
+      setEngineers(res.data);
+    } catch (err) {
+      console.error("Failed to fetch engineers", err);
+    }
   };
 
-  const handleChange = (e) =>
+  // Handle input change
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
+  // Submit project
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios.post("http://localhost:4000/api/project", form, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    try {
+      setLoading(true);
 
-    alert("Lead posted successfully");
-    setForm({ title: "", location: "", budget: "", floors: "" });
+      await CreateProjectApi({
+        title: form.title,
+        location: form.location,
+        budget: Number(form.budget),
+        floors: Number(form.floors),
+      });
+
+      alert("Lead posted successfully ✅");
+
+      setForm({
+        title: "",
+        location: "",
+        budget: "",
+        floors: "",
+      });
+    } catch (err) {
+      console.error("Post failed", err);
+      alert("Failed to post lead ❌");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,13 +73,48 @@ export const ClientDashboard=()=> {
         <h2 className="font-semibold mb-3">Post New Requirement</h2>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input className="input" name="title" placeholder="Project Title" onChange={handleChange} />
-          <input className="input" name="location" placeholder="Location" onChange={handleChange} />
-          <input className="input" name="budget" placeholder="Budget" onChange={handleChange} />
-          <input className="input" name="floors" placeholder="No. of Floors" onChange={handleChange} />
+          <input
+            className="input"
+            name="title"
+            placeholder="Project Title"
+            value={form.title}
+            onChange={handleChange}
+            required
+          />
 
-          <button className="w-full bg-blue-600 text-white py-2 rounded">
-            Post Lead
+          <input
+            className="input"
+            name="location"
+            placeholder="Location"
+            value={form.location}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            className="input"
+            name="budget"
+            placeholder="Budget"
+            value={form.budget}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            className="input"
+            name="floors"
+            placeholder="No. of Floors"
+            value={form.floors}
+            onChange={handleChange}
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-60"
+          >
+            {loading ? "Posting..." : "Post Lead"}
           </button>
         </form>
       </div>
@@ -65,7 +125,7 @@ export const ClientDashboard=()=> {
       <div className="grid md:grid-cols-2 gap-4">
         {engineers.map((eng) => (
           <div key={eng._id} className="bg-white p-4 rounded shadow">
-            <h3 className="font-semibold">{eng.user_id.name}</h3>
+            <h3 className="font-semibold">{eng.user_id?.name}</h3>
             <p>Type: {eng.engineer_type}</p>
             <p>Experience: {eng.experience} years</p>
             <p>Degree: {eng.max_degree}</p>
@@ -74,5 +134,4 @@ export const ClientDashboard=()=> {
       </div>
     </div>
   );
-}
-
+};

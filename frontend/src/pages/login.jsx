@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginApi } from "../api/auth_api";
+import { LoginApi } from "../api/auth_api";
 import { InputError } from "../components/InputErrors";
 import { Navigate } from "react-router-dom";
 export default function Login() {
@@ -14,7 +14,7 @@ export default function Login() {
     setErrors({});
 
     try {
-      const res = await loginApi(form);
+      const res = await LoginApi(form);
       localStorage.setItem("token", res.data.token);
       window.location.href =
         res.data.role === "CLIENT" ? "/client" : "/engineer";
