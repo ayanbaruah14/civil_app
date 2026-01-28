@@ -1,13 +1,18 @@
-import { useState } from 'react'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Signup from "./pages/signup";
+import Login from "./pages/login";
+import { ClientDashboard } from "./pages/user_dashboard";
+import { EngineerDashboard } from "./pages/eng_dashboard";
 
-function App() {
-
+export default function App() {
   return (
-    <>
-    
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/client" element={<ClientDashboard />} />
+        <Route path="/engineer" element={<EngineerDashboard />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App
