@@ -9,16 +9,16 @@ import {
 } from "../Controllers/leadController.js";
 import auth from "../middleware/authMiddleware.js";
 
-const router = express.Router();
+const lead_router = express.Router();
 
 /* Client */
-router.post("/", auth, createLead);
-router.patch("/:id/status", auth, updateLeadStatus);
-router.post("/:id/request", auth, requestEngineer);
+lead_router.post("/", auth, createLead);
+lead_router.patch("/:id/status", auth, updateLeadStatus);
+lead_router.post("/:id/request", auth, requestEngineer);
 
 /* Engineer */
-router.get("/open", auth, getOpenLeads);
-router.get("/requested", auth, getRequestedLeads);
-router.post("/:id/apply", auth, applyToLead);
+lead_router.get("/open", auth, getOpenLeads);
+lead_router.get("/requested", auth, getRequestedLeads);
+lead_router.post("/:id/apply", auth, applyToLead);
 
-export default router;
+export default lead_router;

@@ -8,6 +8,14 @@ export const createLead = async (req, res) => {
   });
   res.status(201).json(lead);
 };
+// Get my leads (IMPORTANT)
+export const getMyLeads = async (req, res) => {
+  const leads = await Lead.find({ client_id: req.user.id })
+    .populate("applications.engineer_id", "engineer_type user_id")
+    .sort({ createdAt: -1 });
+
+  res.json(leads);
+};
 
 export const updateLeadStatus = async (req, res) => {
   const lead = await Lead.findById(req.params.id);
@@ -42,11 +50,19 @@ export const getRequestedLeads = async (req, res) => {
 };
 
 export const applyToLead = async (req, res) => {
-  const lead = await Lead.findById(req.params.id);
+  const { leadId, quote } = req.body;
 
-  lead.applicants.push({
+  const lead = await Lead.findById(leadId);
+
+  const alreadyApplied = lead.applications.find(
+    (a) => a.engineer_id.toString() === req.user.engineerId
+  );
+  if (alreadyApplied)
+    return res.status(400).json("Already applied");
+
+  lead.applications.push({
     engineer_id: req.user.engineerId,
-    appliedAt: new Date(),
+    quote,
   });
 
   await lead.save();
