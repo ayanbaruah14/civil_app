@@ -11,7 +11,15 @@ const engSchema=new mongoose.Schema(
     max_degree: { type: String, required: true },
     experience: { type: Number, required: true },
     verified: { type: Boolean, default: false },
+      appliedLeads: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Lead",
   },
+],
+  },
+
+
   { timestamps: true }
 );
 
