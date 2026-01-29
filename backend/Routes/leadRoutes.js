@@ -12,6 +12,7 @@ import auth from "../middleware/authMiddleware.js";
 const lead_router = express.Router();
 
 /* Client */
+lead_router.get("/my",auth,GetMyProjects)
 lead_router.post("/", auth, createLead);
 lead_router.patch("/:id/status", auth, updateLeadStatus);
 lead_router.post("/:id/request", auth, requestEngineer);
