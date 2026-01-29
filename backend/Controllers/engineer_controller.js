@@ -1,18 +1,14 @@
-export const getAllEngineers = (req, res) => {
-  res.json([
-    {
-      _id: "1",
-      engineer_type: "Civil",
-      experience: 5,
-      max_degree: "B.Tech",
-      user_id: { name: "Rahul Sharma" },
-    },
-    {
-      _id: "2",
-      engineer_type: "Structural",
-      experience: 8,
-      max_degree: "M.Tech",
-      user_id: { name: "Amit Verma" },
-    },
-  ]);
+import Engineer from "../Models/engineer.js";
+
+export const getAllEngineers = async (req, res) => {
+  try {
+    const engineers = await Engineer.find()
+      .populate("user_id", "name email") 
+      .sort({ createdAt: -1 }); // latest first 
+
+    res.status(200).json(engineers);
+  } catch (error) {
+    console.error("Error fetching engineers:", error);
+    res.status(500).json({ message: "Failed to fetch engineers" });
+  }
 };
