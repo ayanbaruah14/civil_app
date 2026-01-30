@@ -5,6 +5,9 @@ import API from "./api";
 // Get projects posted by logged-in client
 export const GetMyProjectsApi = () =>
   API.get("/lead/my");
+//get applied leads
+export const GetAppliedLeadsApi = () =>
+  API.get("/lead/applied");
 
 // Update project status
 export const UpdateProjectStatusApi = (id, status) =>

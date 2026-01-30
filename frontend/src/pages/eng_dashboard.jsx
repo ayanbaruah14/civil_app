@@ -3,9 +3,12 @@ import {
   GetOpenProjectsApi,
   GetRequestedProjectsApi,
   ApplyToProjectApi,
+  GetAppliedLeadsApi,
 } from "../api/lead_auth_api";
 
 export const EngineerDashboard = () => {
+  const [appliedLeads, setAppliedLeads] = useState([]);
+
   const [openProjects, setOpenProjects] = useState([]);
   const [requestedProjects, setRequestedProjects] = useState([]);
   const [quotes, setQuotes] = useState({});
@@ -13,13 +16,15 @@ export const EngineerDashboard = () => {
 
   const fetchAll = async () => {
     try {
-      const [openRes, requestedRes] = await Promise.all([
+      const [openRes, requestedRes,appliedRes] = await Promise.all([
         GetOpenProjectsApi(),
         GetRequestedProjectsApi(),
+         GetAppliedLeadsApi(),
       ]);
 
       setOpenProjects(openRes.data);
       setRequestedProjects(requestedRes.data);
+       setAppliedLeads(appliedRes.data);
     } catch (err) {
       console.error("Failed to fetch projects", err);
       alert("Failed to load projects ❌");
@@ -114,6 +119,41 @@ export const EngineerDashboard = () => {
           </div>
         ))}
       </div>
+
+
+      {/* APPLIED LEADS */}
+<h2 className="font-semibold mb-3">Leads You Applied To</h2>
+
+{appliedLeads.length === 0 && (
+  <p className="text-gray-500 mb-6">You haven’t applied to any leads yet</p>
+)}
+
+<div className="grid md:grid-cols-2 gap-4 mb-10">
+  {appliedLeads.map((lead) => (
+    <div key={lead._id} className="bg-white p-4 rounded shadow">
+      <h3 className="font-semibold">{lead.title}</h3>
+      <p>Location: {lead.location}</p>
+      <p>Budget: {lead.budget}</p>
+      <p>
+        Status:{" "}
+        <span
+          className={
+            lead.status === "completed"
+              ? "text-green-600 font-semibold"
+              : "text-yellow-600 font-semibold"
+          }
+        >
+          {lead.status}
+        </span>
+      </p>
+
+      <span className="text-gray-500 text-sm">
+        Already applied
+      </span>
+    </div>
+  ))}
+</div>
+
     </div>
   );
 };

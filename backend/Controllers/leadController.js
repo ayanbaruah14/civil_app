@@ -69,22 +69,34 @@ export const applyToLead = async (req, res) => {
     const engineerId = req.user.engineerId;
 
     const lead = await Lead.findById(leadId);
-    if (!lead) return res.status(404).json({ message: "Lead not found" });
-
-    const alreadyApplied = lead.applications.some(
-      (a) => a.engineer_id.toString() === engineerId
-    );
-    if (alreadyApplied) {
-      return res.status(400).json({ message: "Already applied" });
+    if (!lead) {
+      return res.status(404).json({ message: "Lead not found" });
     }
 
+    // ❌ Do not allow apply on completed leads
+    if (lead.status === "completed") {
+      return res.status(400).json({ message: "Lead already completed" });
+    }
+
+    // ✅ Safe check (handles empty array)
+    const alreadyApplied = lead.applications?.some(
+      (app) => app.engineer_id.toString() === engineerId.toString()
+    );
+
+    if (alreadyApplied) {
+      return res.status(400).json({ message: "Already applied to this lead" });
+    }
+
+    // ✅ Correct application object
     lead.applications.push({
       engineer_id: engineerId,
       quote,
+      appliedAt: new Date(),
     });
+
     await lead.save();
 
-    // 👇 ALSO update Engineer.appliedLeads
+    // ✅ Keep Engineer collection in sync
     await Engineer.findByIdAndUpdate(engineerId, {
       $addToSet: { appliedLeads: leadId },
     });
@@ -95,3 +107,23 @@ export const applyToLead = async (req, res) => {
     res.status(500).json({ message: "Apply failed" });
   }
 };
+
+
+
+export const getAppliedLeads = async (req, res) => {
+  try {
+    const engineer = await Engineer.findById(req.user.engineerId)
+      .populate({
+        path: "appliedLeads",
+        model: "Lead",
+        select: "title location budget status",
+      });
+
+    res.json(engineer.appliedLeads);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch applied leads" });
+  }
+};
+
+
