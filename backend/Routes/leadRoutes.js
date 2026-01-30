@@ -6,20 +6,21 @@ import {
   getOpenLeads,
   getRequestedLeads,
   applyToLead,
+  getMyLeads,
 } from "../Controllers/leadController.js";
-import auth from "../middleware/authMiddleware.js";
+import auth from "../Middlewares/authMiddleware.js";
 
-const lead_router = express.Router();
+const Lead_router = express.Router();
 
 /* Client */
-lead_router.get("/my",auth,GetMyProjects)
-lead_router.post("/", auth, createLead);
-lead_router.patch("/:id/status", auth, updateLeadStatus);
-lead_router.post("/:id/request", auth, requestEngineer);
+Lead_router.get("/my",auth,getMyLeads);
+Lead_router.post("/", auth, createLead);
+Lead_router.patch("/:id/status", auth, updateLeadStatus);
+Lead_router.post("/:id/request", auth, requestEngineer);
 
 /* Engineer */
-lead_router.get("/open", auth, getOpenLeads);
-lead_router.get("/requested", auth, getRequestedLeads);
-lead_router.post("/:id/apply", auth, applyToLead);
+Lead_router.get("/open", auth, getOpenLeads);
+Lead_router.get("/requested", auth, getRequestedLeads);
+Lead_router.post("/:id/apply", auth, applyToLead);
 
-export default lead_router;
+export default Lead_router;

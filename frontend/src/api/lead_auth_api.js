@@ -26,4 +26,4 @@ export const GetRequestedProjectsApi = () =>
 
 // Apply to open project
 export const ApplyToProjectApi = (projectId, quote) =>
-  API.post("lead/apply", { project_id: projectId, quote });
+  API.post(`lead/${projectId}/apply`, { project_id: projectId, quote });

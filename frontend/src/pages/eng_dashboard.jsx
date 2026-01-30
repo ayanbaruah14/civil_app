@@ -11,25 +11,57 @@ export const EngineerDashboard = () => {
   const [quotes, setQuotes] = useState({});
   const [loadingId, setLoadingId] = useState(null);
 
+  const fetchAll = async () => {
+    try {
+      const [openRes, requestedRes] = await Promise.all([
+        GetOpenProjectsApi(),
+        GetRequestedProjectsApi(),
+      ]);
+
+      setOpenProjects(openRes.data);
+      setRequestedProjects(requestedRes.data);
+    } catch (err) {
+      console.error("Failed to fetch projects", err);
+      alert("Failed to load projects ❌");
+    }
+  };
+
   useEffect(() => {
     fetchAll();
   }, []);
 
-  const fetchAll = async () => {
-    const open = await GetOpenProjectsApi();
-    const requested = await GetRequestedProjectsApi();
-    setOpenProjects(open.data);
-    setRequestedProjects(requested.data);
-  };
+
+  /* ================= APPLY ================= */
 
   const applyToProject = async (projectId) => {
     const quote = quotes[projectId];
-    if (!quote) return alert("Enter quote");
 
-    setLoadingId(projectId);
-    await ApplyToProjectApi(projectId, quote);
-    setQuotes({ ...quotes, [projectId]: "" });
-    setLoadingId(null);
+    if (!quote) {
+      alert("Please enter a quote");
+      return;
+    }
+
+    try {
+      setLoadingId(projectId);
+
+      await ApplyToProjectApi(projectId, quote);
+
+      alert("✅ Applied successfully!");
+
+      // clear quote input
+      setQuotes((prev) => ({ ...prev, [projectId]: "" }));
+
+      // refresh open projects (optional but correct)
+      fetchAll();
+    } catch (err) {
+      console.error("Apply failed", err);
+      alert(
+        err?.response?.data?.message ||
+          "❌ Failed to apply (maybe already applied)"
+      );
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   return (

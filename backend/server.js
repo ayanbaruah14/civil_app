@@ -2,16 +2,16 @@ import express from "express";
 import cors from "cors";
 import "./config/db.js"
 import router from "./Routes/auth_rt.js";
-import lead_router from "./Routes/leadRoutes.js";
-import EngineerRoutes from "./Routes/engineer_routes.js"
+import Lead_router from "./Routes/leadRoutes.js";
+import EngineerRoutes from "./Routes/engineer_routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000
 app.use(express.json());
 app.use(cors());
-app.use("/api/auth", router);
-app.use("/api/lead", lead_router);
-app.use("/api/engineer", EngineerRoutes);
+app.use("/api/auth",router);
+app.use("/api/lead",Lead_router);
+app.use("/api/engineer",EngineerRoutes);
 
 
 app.get('/ping', (req, res) => {

@@ -6,7 +6,7 @@ export const LoginApi = (data) => API.post("/auth/login", data);
 
 /* ============== CLIENT ================== */
 // Post new project / lead
-export const CreateProjectApi = (data) => API.post("/", data);
+export const CreateProjectApi = (data) => API.post("/lead", data);
 
 // Get all engineers
 export const GetAllEngineersApi = () => API.get("/engineer/all");

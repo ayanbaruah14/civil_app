@@ -1,5 +1,5 @@
 import Lead from "../Models/Lead.js";
-
+import Engineer from "../Models/engineer.js";
 /* CLIENT */
 export const createLead = async (req, res) => {
   const lead = await Lead.create({
@@ -10,12 +10,26 @@ export const createLead = async (req, res) => {
 };
 // Get my leads (IMPORTANT)
 export const getMyLeads = async (req, res) => {
-  const leads = await Lead.find({ client_id: req.user.id })
-    .populate("applications.engineer_id", "engineer_type user_id")
-    .sort({ createdAt: -1 });
+  try {
+    const leads = await Lead.find({ client_id: req.user.id })
+      .populate({
+        path: "applications.engineer_id",
+        model: "Engineer", 
+        populate: {
+          path: "user_id",
+          model: "User",
+          select: "name email",
+        },
+      })
+      .sort({ createdAt: -1 });
 
-  res.json(leads);
+    res.status(200).json(leads);
+  } catch (err) {
+    console.error("getMyLeads error:", err);
+    res.status(500).json({ message: "Failed to fetch my leads" });
+  }
 };
+
 
 export const updateLeadStatus = async (req, res) => {
   const lead = await Lead.findById(req.params.id);
@@ -50,21 +64,34 @@ export const getRequestedLeads = async (req, res) => {
 };
 
 export const applyToLead = async (req, res) => {
-  const { leadId, quote } = req.body;
+  try {
+    const { leadId, quote } = req.body;
+    const engineerId = req.user.engineerId;
 
-  const lead = await Lead.findById(leadId);
+    const lead = await Lead.findById(leadId);
+    if (!lead) return res.status(404).json({ message: "Lead not found" });
 
-  const alreadyApplied = lead.applications.find(
-    (a) => a.engineer_id.toString() === req.user.engineerId
-  );
-  if (alreadyApplied)
-    return res.status(400).json("Already applied");
+    const alreadyApplied = lead.applications.some(
+      (a) => a.engineer_id.toString() === engineerId
+    );
+    if (alreadyApplied) {
+      return res.status(400).json({ message: "Already applied" });
+    }
 
-  lead.applications.push({
-    engineer_id: req.user.engineerId,
-    quote,
-  });
+    lead.applications.push({
+      engineer_id: engineerId,
+      quote,
+    });
+    await lead.save();
 
-  await lead.save();
-  res.json({ message: "Applied successfully" });
+    // 👇 ALSO update Engineer.appliedLeads
+    await Engineer.findByIdAndUpdate(engineerId, {
+      $addToSet: { appliedLeads: leadId },
+    });
+
+    res.status(200).json({ message: "Applied successfully" });
+  } catch (err) {
+    console.error("applyToLead error:", err);
+    res.status(500).json({ message: "Apply failed" });
+  }
 };

@@ -6,5 +6,4 @@ const router=Router();
 
 router.post("/signup", signupValidation ,Signup);
 router.post("/login",loginValidation ,login);
-
 export default router;

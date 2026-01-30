@@ -72,9 +72,19 @@ export const ClientDashboard = () => {
         floors: "",
       });
 
-      fetchMyProjects();
+      const res = await GetMyProjectsApi();
+      setProjects(res.data);
+
+          const postedLead = res.data.find(
+      (p) => p.title === form.title
+    );
+
+    if (postedLead) {
+      alert("✅ Lead posted successfully! You can now manage it in My Leads.");
+    }
     } catch (err) {
       alert("Failed to post lead ❌");
+      console.log(err);
     } finally {
       setLoading(false);
     }
