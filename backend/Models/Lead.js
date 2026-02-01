@@ -31,15 +31,24 @@ const leadSchema = new mongoose.Schema(
       },
     ],
 
-    applicants: [
-      {
-        engineer_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Engineer",
-        },
-        appliedAt: Date,
-      },
-    ],
+applicants: [
+  {
+    engineer_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Engineer",
+      required: true,
+    },
+    quote: {
+      type: Number,
+      required: true,
+    },
+    appliedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+],
+
   },
   { timestamps: true }
 );

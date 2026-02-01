@@ -7,6 +7,7 @@ import {
   getRequestedLeads,
   applyToLead,
   getMyLeads,
+  getAppliedLeads
 } from "../Controllers/leadController.js";
 import auth from "../Middlewares/authMiddleware.js";
 
@@ -23,6 +24,6 @@ Lead_router.post("/:id/request", auth, requestEngineer);
 /* Engineer */
 Lead_router.get("/open", auth, getOpenLeads);
 Lead_router.get("/requested", auth, getRequestedLeads);
-Lead_router.post("/:id/apply", auth, applyToLead);
+Lead_router.post("/:leadId/apply", auth, applyToLead);
 
 export default Lead_router;

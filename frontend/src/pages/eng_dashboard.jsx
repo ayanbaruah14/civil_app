@@ -75,11 +75,15 @@ export const EngineerDashboard = () => {
 
       {/* OPEN PROJECTS */}
       <h2 className="font-semibold mb-3">Open Leads</h2>
-
+{openProjects.length === 0 && (
+  <p className="text-gray-500 mb-6">No open projects available</p>
+)}
       <div className="grid md:grid-cols-2 gap-4 mb-10">
         {openProjects.map((proj) => (
           <div key={proj._id} className="bg-white p-4 rounded shadow">
-            <h3 className="font-semibold">{proj.title}</h3>
+            <h3 className="font-semibold">Title: {proj.title}</h3>
+            <h3 className="font-semibold">Location: {proj.location}</h3>
+            <h3 className="font-semibold">Budget: {proj.budget}</h3>
             <p>Status: {proj.status}</p>
 
             <input
@@ -104,7 +108,9 @@ export const EngineerDashboard = () => {
 
       {/* REQUESTED PROJECTS */}
       <h2 className="font-semibold mb-3">Requested For You</h2>
-
+{requestedProjects.length === 0 && (
+  <p className="text-gray-500 mb-6">You have no request from any client</p>
+)}
       <div className="grid md:grid-cols-2 gap-4">
         {requestedProjects.map((proj) => (
           <div

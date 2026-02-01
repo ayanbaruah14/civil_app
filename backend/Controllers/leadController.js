@@ -1,5 +1,6 @@
 import Lead from "../Models/Lead.js";
 import Engineer from "../Models/engineer.js";
+import User from "../Models/user.js";
 /* CLIENT */
 export const createLead = async (req, res) => {
   const lead = await Lead.create({
@@ -13,7 +14,7 @@ export const getMyLeads = async (req, res) => {
   try {
     const leads = await Lead.find({ client_id: req.user.id })
       .populate({
-        path: "applications.engineer_id",
+        path: "applicants.engineer_id",
         model: "Engineer", 
         populate: {
           path: "user_id",
@@ -65,7 +66,8 @@ export const getRequestedLeads = async (req, res) => {
 
 export const applyToLead = async (req, res) => {
   try {
-    const { leadId, quote } = req.body;
+    const {leadId} = req.params;
+    const {quote} = req.body;
     const engineerId = req.user.engineerId;
 
     const lead = await Lead.findById(leadId);
@@ -79,7 +81,7 @@ export const applyToLead = async (req, res) => {
     }
 
     // ✅ Safe check (handles empty array)
-    const alreadyApplied = lead.applications?.some(
+    const alreadyApplied = lead.applicants?.some(
       (app) => app.engineer_id.toString() === engineerId.toString()
     );
 
@@ -88,7 +90,7 @@ export const applyToLead = async (req, res) => {
     }
 
     // ✅ Correct application object
-    lead.applications.push({
+    lead.applicants.push({
       engineer_id: engineerId,
       quote,
       appliedAt: new Date(),
@@ -112,18 +114,37 @@ export const applyToLead = async (req, res) => {
 
 export const getAppliedLeads = async (req, res) => {
   try {
-    const engineer = await Engineer.findById(req.user.engineerId)
-      .populate({
-        path: "appliedLeads",
-        model: "Lead",
-        select: "title location budget status",
-      });
+    // 🔐 Ensure only engineers access this
+    if (req.user.role !== "ENGINEER") {
+      return res.status(403).json({ message: "Access denied" });
+    }
 
-    res.json(engineer.appliedLeads);
+    const engineerId = req.user.engineerId;
+
+    if (!engineerId) {
+      return res.status(400).json({
+        message: "Engineer ID missing from request",
+      });
+    }
+
+    const engineer = await Engineer.findById(engineerId).populate({
+      path: "appliedLeads",
+      model: "Lead",
+      select: "title location budget status",
+    });
+
+    if (!engineer) {
+      return res.status(404).json({
+        message: "Engineer profile not found",
+      });
+    }
+
+    res.status(200).json(engineer.appliedLeads ?? []);
   } catch (err) {
-    console.error(err);
+    console.error("getAppliedLeads error:", err);
     res.status(500).json({ message: "Failed to fetch applied leads" });
   }
 };
+
 
 
